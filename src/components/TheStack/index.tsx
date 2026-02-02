@@ -399,14 +399,9 @@ export function TheStack({
   );
 }
 
-// Loading spinner
+// Loading fallback - returns null for clean loading
 function LoadingFallback() {
-  return (
-    <mesh>
-      <boxGeometry args={[0.3, 0.3, 0.3]} />
-      <meshBasicMaterial color={COLORS.signalCyan} wireframe />
-    </mesh>
-  );
+  return null;
 }
 
 // Global styles

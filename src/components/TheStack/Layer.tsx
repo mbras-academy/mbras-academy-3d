@@ -5,7 +5,6 @@ import { useRef, useState, useMemo } from "react";
 import { useFrame } from "@react-three/fiber";
 import * as THREE from "three";
 import { Text, RoundedBox } from "@react-three/drei";
-import { LayerVisual } from "./LayerVisual";
 import { LayerData, COLORS, LayerId } from "./types";
 
 interface LayerProps {
@@ -92,14 +91,6 @@ export function Layer({
           type={deviceConfig.type}
           isActive={isActive}
           isDimmed={isDimmed}
-          intensity={intensity}
-        />
-      </group>
-
-      <group position={[0, 0.7, 0]}>
-        <LayerVisual
-          layerId={data.id}
-          isActive={isActive}
           intensity={intensity}
         />
       </group>
