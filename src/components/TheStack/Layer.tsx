@@ -499,9 +499,9 @@ function LeadFunnel({
         />
       </mesh>
 
-      {/* Funnel body - glass */}
+      {/* Funnel body - glass (wide at top, narrow at bottom) */}
       <mesh position={[0, 0, 0]}>
-        <cylinderGeometry args={[0.1, 0.45, 0.7, 32, 1, true]} />
+        <cylinderGeometry args={[0.45, 0.1, 0.7, 32, 1, true]} />
         <meshPhysicalMaterial
           color="#0a0a15"
           metalness={0.1}
@@ -514,7 +514,7 @@ function LeadFunnel({
         />
       </mesh>
 
-      {/* Funnel rim */}
+      {/* Funnel rim at top */}
       <mesh position={[0, 0.35, 0]} rotation={[Math.PI / 2, 0, 0]}>
         <torusGeometry args={[0.45, 0.02, 8, 32]} />
         <meshStandardMaterial
@@ -526,9 +526,9 @@ function LeadFunnel({
         />
       </mesh>
 
-      {/* Funnel spout */}
+      {/* Funnel spout (narrow exit at bottom) */}
       <mesh position={[0, -0.45, 0]}>
-        <cylinderGeometry args={[0.08, 0.1, 0.2, 16]} />
+        <cylinderGeometry args={[0.1, 0.08, 0.2, 16]} />
         <meshStandardMaterial
           color="#1a1a2e"
           metalness={0.7}
@@ -538,10 +538,10 @@ function LeadFunnel({
         />
       </mesh>
 
-      {/* Filter rings inside funnel */}
+      {/* Filter rings inside funnel (larger at top, smaller at bottom) */}
       {[0.15, 0, -0.15].map((y, i) => (
         <mesh key={i} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.25 - i * 0.06, 0.008, 8, 32]} />
+          <torusGeometry args={[0.35 - i * 0.08, 0.008, 8, 32]} />
           <meshBasicMaterial
             color={COLORS.gold}
             transparent
