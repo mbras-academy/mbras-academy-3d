@@ -185,7 +185,7 @@ function DeviceMesh({
 }
 
 // ============================================
-// 1. NEURAL BRAIN - Cérebro com sinapses
+// 1. AI CHIP - Processador de IA com circuitos
 // ============================================
 function NeuralBrain({
   isActive,
@@ -196,200 +196,309 @@ function NeuralBrain({
   intensity: number;
   opacity: number;
 }) {
-  const brainRef = useRef<THREE.Group>(null);
-  const synapsesRef = useRef<THREE.Group>(null);
+  const chipRef = useRef<THREE.Group>(null);
+  const coreRef = useRef<THREE.Mesh>(null);
+  const ringsRef = useRef<THREE.Group>(null);
+  const dataFlowRef = useRef<THREE.Points>(null);
 
-  // Generate neural nodes
-  const nodes = useMemo(() => {
-    const positions: THREE.Vector3[] = [];
-    // Brain shape - ellipsoid with lobes
-    for (let i = 0; i < 60; i++) {
-      const theta = Math.random() * Math.PI * 2;
-      const phi = Math.acos(2 * Math.random() - 1);
-      const r = 0.28 + Math.random() * 0.08;
-      // Flatten slightly and add brain-like asymmetry
-      const x = r * Math.sin(phi) * Math.cos(theta) * 1.1;
-      const y = r * Math.sin(phi) * Math.sin(theta) * 0.85;
-      const z = r * Math.cos(phi);
-      positions.push(new THREE.Vector3(x, y, z));
+  // Circuit paths on the chip
+  const circuitPaths = useMemo(() => {
+    const paths: {
+      start: [number, number];
+      end: [number, number];
+      horizontal: boolean;
+    }[] = [];
+    // Horizontal paths
+    for (let i = 0; i < 8; i++) {
+      const y = -0.15 + i * 0.043;
+      paths.push({ start: [-0.22, y], end: [0.22, y], horizontal: true });
+    }
+    // Vertical paths
+    for (let i = 0; i < 8; i++) {
+      const x = -0.15 + i * 0.043;
+      paths.push({ start: [x, -0.22], end: [x, 0.22], horizontal: false });
+    }
+    return paths;
+  }, []);
+
+  // Data flow particles
+  const dataParticles = useMemo(() => {
+    const count = 50;
+    const positions = new Float32Array(count * 3);
+    for (let i = 0; i < count; i++) {
+      const angle = (i / count) * Math.PI * 2;
+      const radius = 0.3 + Math.random() * 0.15;
+      positions[i * 3] = Math.cos(angle) * radius;
+      positions[i * 3 + 1] = (Math.random() - 0.5) * 0.1;
+      positions[i * 3 + 2] = Math.sin(angle) * radius;
     }
     return positions;
   }, []);
 
-  // Generate synapse connections
-  const connections = useMemo(() => {
-    const conns: [THREE.Vector3, THREE.Vector3][] = [];
-    for (let i = 0; i < nodes.length; i++) {
-      // Connect to 2-3 nearest neighbors
-      const sorted = [...nodes].sort(
-        (a, b) => a.distanceTo(nodes[i]) - b.distanceTo(nodes[i]),
-      );
-      for (let j = 1; j <= 3; j++) {
-        if (Math.random() > 0.4) {
-          conns.push([nodes[i], sorted[j]]);
-        }
-      }
-    }
-    return conns;
-  }, [nodes]);
-
   useFrame((state) => {
-    if (brainRef.current) {
-      brainRef.current.rotation.y = state.clock.elapsedTime * 0.15;
+    const t = state.clock.elapsedTime;
+
+    if (chipRef.current) {
+      chipRef.current.rotation.y = t * 0.1;
     }
-    if (synapsesRef.current && isActive) {
-      synapsesRef.current.rotation.y = -state.clock.elapsedTime * 0.1;
+
+    if (coreRef.current && isActive) {
+      const pulse = Math.sin(t * 3) * 0.1 + 1;
+      coreRef.current.scale.setScalar(pulse);
+    }
+
+    if (ringsRef.current) {
+      ringsRef.current.rotation.z = t * 0.5;
+    }
+
+    if (dataFlowRef.current && isActive) {
+      const positions = dataFlowRef.current.geometry.attributes.position
+        .array as Float32Array;
+      for (let i = 0; i < positions.length / 3; i++) {
+        const angle = t * 0.5 + (i / (positions.length / 3)) * Math.PI * 2;
+        const radius = 0.32 + Math.sin(t * 2 + i) * 0.05;
+        positions[i * 3] = Math.cos(angle) * radius;
+        positions[i * 3 + 2] = Math.sin(angle) * radius;
+        positions[i * 3 + 1] = Math.sin(t * 3 + i * 0.5) * 0.08;
+      }
+      dataFlowRef.current.geometry.attributes.position.needsUpdate = true;
     }
   });
 
   return (
     <group>
-      {/* Base platform */}
-      <mesh position={[0, -0.45, 0]}>
-        <cylinderGeometry args={[0.5, 0.6, 0.08, 32]} />
+      {/* Base platform - luxurious dark */}
+      <mesh position={[0, -0.4, 0]}>
+        <cylinderGeometry args={[0.5, 0.55, 0.06, 64]} />
         <meshStandardMaterial
-          color="#0a0a12"
-          metalness={0.9}
-          roughness={0.2}
+          color="#0a0a0f"
+          metalness={0.95}
+          roughness={0.1}
           transparent
           opacity={opacity}
         />
       </mesh>
 
-      {/* Pedestal */}
-      <mesh position={[0, -0.3, 0]}>
-        <cylinderGeometry args={[0.08, 0.12, 0.3, 16]} />
+      {/* Gold accent ring on base */}
+      <mesh position={[0, -0.36, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.48, 0.008, 16, 64]} />
         <meshStandardMaterial
-          color="#15151f"
-          metalness={0.8}
-          roughness={0.3}
+          color={COLORS.gold}
+          metalness={1}
+          roughness={0.1}
+          emissive={COLORS.gold}
+          emissiveIntensity={isActive ? 0.4 : 0.15}
           transparent
           opacity={opacity}
         />
       </mesh>
 
-      {/* Brain container - glass dome */}
-      <mesh position={[0, 0.05, 0]}>
-        <sphereGeometry args={[0.42, 32, 32, 0, Math.PI * 2, 0, Math.PI / 2]} />
-        <meshPhysicalMaterial
-          color="#0a0a15"
-          metalness={0.1}
-          roughness={0}
-          transmission={0.92}
-          thickness={0.5}
-          transparent
-          opacity={opacity * 0.6}
-          side={THREE.DoubleSide}
-        />
-      </mesh>
-
-      {/* Brain structure */}
-      <group ref={brainRef} position={[0, 0.05, 0]}>
-        {/* Main brain mass */}
+      {/* Floating chip group */}
+      <group ref={chipRef} position={[0, 0.05, 0]}>
+        {/* Main chip body */}
         <mesh>
-          <sphereGeometry args={[0.25, 32, 32]} />
-          <meshPhysicalMaterial
-            color="#1a1a2e"
-            metalness={0.3}
-            roughness={0.7}
+          <boxGeometry args={[0.5, 0.06, 0.5]} />
+          <meshStandardMaterial
+            color="#0f0f18"
+            metalness={0.9}
+            roughness={0.2}
             transparent
-            opacity={opacity * 0.9}
+            opacity={opacity}
           />
         </mesh>
 
-        {/* Brain folds/grooves */}
-        {[0, 0.5, 1, 1.5].map((offset, i) => (
-          <mesh key={i} rotation={[0, offset * Math.PI, 0]}>
-            <torusGeometry args={[0.2, 0.03, 8, 32, Math.PI]} />
-            <meshStandardMaterial
-              color="#252535"
-              metalness={0.4}
-              roughness={0.6}
+        {/* Chip top surface with circuit pattern */}
+        <mesh position={[0, 0.031, 0]}>
+          <boxGeometry args={[0.48, 0.002, 0.48]} />
+          <meshStandardMaterial
+            color="#1a1a28"
+            metalness={0.8}
+            roughness={0.3}
+            transparent
+            opacity={opacity}
+          />
+        </mesh>
+
+        {/* Circuit traces */}
+        {circuitPaths.map((path, i) => (
+          <mesh
+            key={i}
+            position={[
+              path.horizontal ? 0 : path.start[0],
+              0.035,
+              path.horizontal ? path.start[1] : 0,
+            ]}
+          >
+            <boxGeometry
+              args={
+                path.horizontal ? [0.44, 0.002, 0.008] : [0.008, 0.002, 0.44]
+              }
+            />
+            <meshBasicMaterial
+              color={COLORS.navyLight}
               transparent
-              opacity={opacity * 0.8}
+              opacity={opacity * (isActive ? 0.6 : 0.25)}
             />
           </mesh>
         ))}
 
-        {/* Neural nodes */}
-        {nodes.map((pos, i) => (
-          <mesh key={i} position={pos}>
-            <sphereGeometry args={[0.015, 8, 8]} />
+        {/* Central processing core */}
+        <group position={[0, 0.06, 0]}>
+          {/* Core base */}
+          <mesh>
+            <boxGeometry args={[0.18, 0.04, 0.18]} />
+            <meshStandardMaterial
+              color="#15152a"
+              metalness={0.9}
+              roughness={0.15}
+              transparent
+              opacity={opacity}
+            />
+          </mesh>
+
+          {/* Core glow */}
+          <mesh ref={coreRef} position={[0, 0.025, 0]}>
+            <boxGeometry args={[0.12, 0.02, 0.12]} />
             <meshBasicMaterial
-              color={i % 5 === 0 ? COLORS.gold : COLORS.navyLight}
+              color={COLORS.gold}
               transparent
               opacity={opacity * (isActive ? 0.9 : 0.4)}
             />
           </mesh>
+
+          {/* AI symbol in core */}
+          <mesh position={[0, 0.04, 0]}>
+            <octahedronGeometry args={[0.04, 0]} />
+            <meshStandardMaterial
+              color={COLORS.gold}
+              metalness={1}
+              roughness={0.1}
+              emissive={COLORS.gold}
+              emissiveIntensity={isActive ? 0.6 : 0.2}
+              transparent
+              opacity={opacity}
+            />
+          </mesh>
+        </group>
+
+        {/* Corner connectors (chip pins visual) */}
+        {[
+          [-0.22, -0.22],
+          [0.22, -0.22],
+          [-0.22, 0.22],
+          [0.22, 0.22],
+        ].map(([x, z], i) => (
+          <mesh key={i} position={[x, 0, z]}>
+            <boxGeometry args={[0.06, 0.08, 0.06]} />
+            <meshStandardMaterial
+              color="#1a1a2e"
+              metalness={0.9}
+              roughness={0.2}
+              transparent
+              opacity={opacity}
+            />
+          </mesh>
         ))}
 
-        {/* Synapse connections */}
-        <group ref={synapsesRef}>
-          {connections
-            .slice(0, isActive ? connections.length : 30)
-            .map(([start, end], i) => (
-              <line key={i}>
-                <bufferGeometry>
-                  <bufferAttribute
-                    attach="attributes-position"
-                    count={2}
-                    array={
-                      new Float32Array([
-                        start.x,
-                        start.y,
-                        start.z,
-                        end.x,
-                        end.y,
-                        end.z,
-                      ])
-                    }
-                    itemSize={3}
-                  />
-                </bufferGeometry>
-                <lineBasicMaterial
-                  color={COLORS.gold}
-                  transparent
-                  opacity={opacity * (isActive ? 0.5 : 0.15)}
-                />
-              </line>
-            ))}
-        </group>
-      </group>
-
-      {/* Electric pulses around brain */}
-      {isActive && (
-        <group position={[0, 0.05, 0]}>
-          {[0, 1, 2].map((i) => (
-            <mesh key={i} rotation={[(Math.PI / 3) * i, (Math.PI / 4) * i, 0]}>
-              <torusGeometry args={[0.35, 0.008, 8, 64]} />
-              <meshBasicMaterial
+        {/* Edge pins */}
+        {[-1, 1].map((side) =>
+          [-0.15, -0.05, 0.05, 0.15].map((offset, i) => (
+            <mesh key={`h${side}${i}`} position={[side * 0.27, -0.01, offset]}>
+              <boxGeometry args={[0.04, 0.02, 0.025]} />
+              <meshStandardMaterial
                 color={COLORS.gold}
+                metalness={1}
+                roughness={0.15}
                 transparent
-                opacity={0.4}
+                opacity={opacity * 0.8}
               />
             </mesh>
-          ))}
-        </group>
+          )),
+        )}
+        {[-1, 1].map((side) =>
+          [-0.15, -0.05, 0.05, 0.15].map((offset, i) => (
+            <mesh key={`v${side}${i}`} position={[offset, -0.01, side * 0.27]}>
+              <boxGeometry args={[0.025, 0.02, 0.04]} />
+              <meshStandardMaterial
+                color={COLORS.gold}
+                metalness={1}
+                roughness={0.15}
+                transparent
+                opacity={opacity * 0.8}
+              />
+            </mesh>
+          )),
+        )}
+      </group>
+
+      {/* Holographic data rings */}
+      <group ref={ringsRef} position={[0, 0.15, 0]}>
+        <mesh rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.35, 0.004, 8, 64]} />
+          <meshBasicMaterial
+            color={COLORS.gold}
+            transparent
+            opacity={opacity * (isActive ? 0.6 : 0.2)}
+          />
+        </mesh>
+        <mesh rotation={[Math.PI / 2.5, 0.3, 0]}>
+          <torusGeometry args={[0.38, 0.003, 8, 64]} />
+          <meshBasicMaterial
+            color={COLORS.navyLight}
+            transparent
+            opacity={opacity * (isActive ? 0.4 : 0.1)}
+          />
+        </mesh>
+      </group>
+
+      {/* Data flow particles */}
+      {isActive && (
+        <points ref={dataFlowRef} position={[0, 0.1, 0]}>
+          <bufferGeometry>
+            <bufferAttribute
+              attach="attributes-position"
+              count={50}
+              array={dataParticles}
+              itemSize={3}
+            />
+          </bufferGeometry>
+          <pointsMaterial
+            size={0.015}
+            color={COLORS.gold}
+            transparent
+            opacity={0.8}
+            sizeAttenuation
+          />
+        </points>
       )}
 
-      {/* Base ring glow */}
-      <mesh position={[0, -0.4, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.45, 0.015, 8, 64]} />
-        <meshBasicMaterial
-          color={COLORS.gold}
-          transparent
-          opacity={opacity * (isActive ? 0.8 : 0.3)}
-        />
-      </mesh>
+      {/* Vertical energy beam */}
+      {isActive && (
+        <mesh position={[0, -0.1, 0]}>
+          <cylinderGeometry args={[0.02, 0.08, 0.5, 16, 1, true]} />
+          <meshBasicMaterial
+            color={COLORS.gold}
+            transparent
+            opacity={0.15}
+            side={THREE.DoubleSide}
+          />
+        </mesh>
+      )}
 
+      {/* Ambient lighting */}
       {isActive && (
         <>
-          <pointLight color={COLORS.gold} intensity={2} distance={3} />
+          <pointLight
+            color={COLORS.gold}
+            intensity={2}
+            distance={2.5}
+            position={[0, 0.2, 0]}
+          />
           <pointLight
             color={COLORS.navyBlue}
             intensity={0.8}
-            distance={2}
-            position={[0, 0.2, 0]}
+            distance={1.5}
+            position={[0, -0.2, 0]}
           />
         </>
       )}
