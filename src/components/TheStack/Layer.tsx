@@ -185,7 +185,7 @@ function DeviceMesh({
 }
 
 // ============================================
-// 1. AI CHIP - Processador de IA com circuitos
+// 1. AI HOLOGRAM - Rede Neural 3D Premium
 // ============================================
 function NeuralBrain({
   isActive,
@@ -196,309 +196,475 @@ function NeuralBrain({
   intensity: number;
   opacity: number;
 }) {
-  const chipRef = useRef<THREE.Group>(null);
-  const coreRef = useRef<THREE.Mesh>(null);
-  const ringsRef = useRef<THREE.Group>(null);
-  const dataFlowRef = useRef<THREE.Points>(null);
+  const mainRef = useRef<THREE.Group>(null);
+  const coreRef = useRef<THREE.Group>(null);
+  const neuralNetRef = useRef<THREE.Group>(null);
+  const dataStreamRef = useRef<THREE.Points>(null);
+  const pulseRingsRef = useRef<THREE.Group>(null);
+  const orbitalRef = useRef<THREE.Group>(null);
 
-  // Circuit paths on the chip
-  const circuitPaths = useMemo(() => {
-    const paths: {
-      start: [number, number];
-      end: [number, number];
-      horizontal: boolean;
-    }[] = [];
-    // Horizontal paths
-    for (let i = 0; i < 8; i++) {
-      const y = -0.15 + i * 0.043;
-      paths.push({ start: [-0.22, y], end: [0.22, y], horizontal: true });
-    }
-    // Vertical paths
-    for (let i = 0; i < 8; i++) {
-      const x = -0.15 + i * 0.043;
-      paths.push({ start: [x, -0.22], end: [x, 0.22], horizontal: false });
-    }
-    return paths;
+  // Generate 3D neural network nodes in spherical layers
+  const neuralNetwork = useMemo(() => {
+    const nodes: { pos: THREE.Vector3; layer: number; size: number }[] = [];
+
+    // Create nodes in concentric spherical shells
+    const shells = [
+      { radius: 0.06, count: 4, size: 0.018 },
+      { radius: 0.12, count: 8, size: 0.014 },
+      { radius: 0.18, count: 14, size: 0.011 },
+      { radius: 0.24, count: 20, size: 0.008 },
+    ];
+
+    shells.forEach((shell, shellIdx) => {
+      for (let i = 0; i < shell.count; i++) {
+        // Fibonacci sphere distribution
+        const phi = Math.acos(1 - (2 * (i + 0.5)) / shell.count);
+        const theta = Math.PI * (1 + Math.sqrt(5)) * i;
+
+        nodes.push({
+          pos: new THREE.Vector3(
+            shell.radius * Math.sin(phi) * Math.cos(theta),
+            shell.radius * Math.cos(phi),
+            shell.radius * Math.sin(phi) * Math.sin(theta),
+          ),
+          layer: shellIdx,
+          size: shell.size,
+        });
+      }
+    });
+
+    return nodes;
   }, []);
 
-  // Data flow particles
-  const dataParticles = useMemo(() => {
-    const count = 50;
-    const positions = new Float32Array(count * 3);
-    for (let i = 0; i < count; i++) {
-      const angle = (i / count) * Math.PI * 2;
-      const radius = 0.3 + Math.random() * 0.15;
-      positions[i * 3] = Math.cos(angle) * radius;
-      positions[i * 3 + 1] = (Math.random() - 0.5) * 0.1;
-      positions[i * 3 + 2] = Math.sin(angle) * radius;
+  // Generate dynamic connections
+  const connections = useMemo(() => {
+    const conns: {
+      start: THREE.Vector3;
+      end: THREE.Vector3;
+      strength: number;
+    }[] = [];
+
+    for (let i = 0; i < neuralNetwork.length; i++) {
+      for (let j = i + 1; j < neuralNetwork.length; j++) {
+        const dist = neuralNetwork[i].pos.distanceTo(neuralNetwork[j].pos);
+        // Connect nearby nodes
+        if (dist < 0.12 && Math.random() > 0.3) {
+          conns.push({
+            start: neuralNetwork[i].pos,
+            end: neuralNetwork[j].pos,
+            strength: 1 - dist / 0.12,
+          });
+        }
+      }
     }
-    return positions;
+
+    return conns;
+  }, [neuralNetwork]);
+
+  // Data stream particles - double helix DNA style
+  const dataStream = useMemo(() => {
+    const count = 150;
+    const positions = new Float32Array(count * 3);
+    const colors = new Float32Array(count * 3);
+
+    for (let i = 0; i < count; i++) {
+      const t = (i / count) * Math.PI * 6;
+      const radius = 0.32;
+      const strand = i % 2;
+
+      positions[i * 3] = Math.cos(t + strand * Math.PI) * radius;
+      positions[i * 3 + 1] = (i / count - 0.5) * 0.8;
+      positions[i * 3 + 2] = Math.sin(t + strand * Math.PI) * radius;
+
+      // Gold gradient
+      const goldIntensity = 0.7 + Math.random() * 0.3;
+      colors[i * 3] = 0.83 * goldIntensity;
+      colors[i * 3 + 1] = 0.69 * goldIntensity;
+      colors[i * 3 + 2] = 0.22 * goldIntensity;
+    }
+
+    return { positions, colors };
   }, []);
 
   useFrame((state) => {
     const t = state.clock.elapsedTime;
 
-    if (chipRef.current) {
-      chipRef.current.rotation.y = t * 0.1;
+    if (mainRef.current) {
+      mainRef.current.rotation.y = t * 0.1;
     }
 
-    if (coreRef.current && isActive) {
-      const pulse = Math.sin(t * 3) * 0.1 + 1;
-      coreRef.current.scale.setScalar(pulse);
+    if (coreRef.current) {
+      const breathe = Math.sin(t * 2) * 0.08 + 1;
+      coreRef.current.scale.setScalar(breathe);
+      coreRef.current.rotation.y = t * 0.5;
+      coreRef.current.rotation.x = Math.sin(t * 0.3) * 0.2;
     }
 
-    if (ringsRef.current) {
-      ringsRef.current.rotation.z = t * 0.5;
+    if (neuralNetRef.current) {
+      neuralNetRef.current.rotation.y = -t * 0.15;
+      neuralNetRef.current.rotation.x = Math.sin(t * 0.2) * 0.1;
     }
 
-    if (dataFlowRef.current && isActive) {
-      const positions = dataFlowRef.current.geometry.attributes.position
+    if (pulseRingsRef.current) {
+      pulseRingsRef.current.children.forEach((ring, i) => {
+        const phase = t * 3 - i * 0.8;
+        const scale = 1 + Math.sin(phase) * 0.15;
+        ring.scale.setScalar(scale);
+        const mat = (ring as THREE.Mesh).material as THREE.MeshBasicMaterial;
+        if (mat)
+          mat.opacity =
+            opacity *
+            (isActive ? 0.5 - i * 0.1 : 0.1) *
+            (0.5 + Math.sin(phase) * 0.5);
+      });
+    }
+
+    if (orbitalRef.current) {
+      orbitalRef.current.rotation.x = t * 0.4;
+      orbitalRef.current.rotation.z = t * 0.25;
+    }
+
+    if (dataStreamRef.current && isActive) {
+      const positions = dataStreamRef.current.geometry.attributes.position
         .array as Float32Array;
       for (let i = 0; i < positions.length / 3; i++) {
-        const angle = t * 0.5 + (i / (positions.length / 3)) * Math.PI * 2;
-        const radius = 0.32 + Math.sin(t * 2 + i) * 0.05;
-        positions[i * 3] = Math.cos(angle) * radius;
-        positions[i * 3 + 2] = Math.sin(angle) * radius;
-        positions[i * 3 + 1] = Math.sin(t * 3 + i * 0.5) * 0.08;
+        // Animate DNA helix rotation
+        const baseT = (i / (positions.length / 3)) * Math.PI * 6;
+        const animT = baseT + t * 0.8;
+        const strand = i % 2;
+        const radius = 0.32 + Math.sin(t * 2 + i * 0.1) * 0.02;
+
+        positions[i * 3] = Math.cos(animT + strand * Math.PI) * radius;
+        positions[i * 3 + 2] = Math.sin(animT + strand * Math.PI) * radius;
+
+        // Vertical flow
+        positions[i * 3 + 1] += 0.004;
+        if (positions[i * 3 + 1] > 0.4) positions[i * 3 + 1] = -0.4;
       }
-      dataFlowRef.current.geometry.attributes.position.needsUpdate = true;
+      dataStreamRef.current.geometry.attributes.position.needsUpdate = true;
     }
   });
 
   return (
     <group>
-      {/* Base platform - luxurious dark */}
-      <mesh position={[0, -0.4, 0]}>
-        <cylinderGeometry args={[0.5, 0.55, 0.06, 64]} />
+      {/* Luxurious hexagonal base */}
+      <mesh position={[0, -0.42, 0]} rotation={[0, Math.PI / 6, 0]}>
+        <cylinderGeometry args={[0.45, 0.5, 0.05, 6]} />
         <meshStandardMaterial
-          color="#0a0a0f"
-          metalness={0.95}
-          roughness={0.1}
+          color="#030308"
+          metalness={0.98}
+          roughness={0.05}
           transparent
           opacity={opacity}
         />
       </mesh>
 
-      {/* Gold accent ring on base */}
-      <mesh position={[0, -0.36, 0]} rotation={[Math.PI / 2, 0, 0]}>
-        <torusGeometry args={[0.48, 0.008, 16, 64]} />
+      {/* Base gold inlay */}
+      <mesh position={[0, -0.39, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <torusGeometry args={[0.42, 0.008, 16, 6]} />
         <meshStandardMaterial
           color={COLORS.gold}
           metalness={1}
           roughness={0.1}
           emissive={COLORS.gold}
-          emissiveIntensity={isActive ? 0.4 : 0.15}
+          emissiveIntensity={isActive ? 0.6 : 0.2}
           transparent
           opacity={opacity}
         />
       </mesh>
 
-      {/* Floating chip group */}
-      <group ref={chipRef} position={[0, 0.05, 0]}>
-        {/* Main chip body */}
-        <mesh>
-          <boxGeometry args={[0.5, 0.06, 0.5]} />
-          <meshStandardMaterial
-            color="#0f0f18"
-            metalness={0.9}
-            roughness={0.2}
-            transparent
-            opacity={opacity}
-          />
-        </mesh>
+      {/* Inner glow ring */}
+      <mesh position={[0, -0.38, 0]} rotation={[Math.PI / 2, 0, 0]}>
+        <ringGeometry args={[0.08, 0.35, 64]} />
+        <meshBasicMaterial
+          color={COLORS.gold}
+          transparent
+          opacity={opacity * (isActive ? 0.12 : 0.03)}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
 
-        {/* Chip top surface with circuit pattern */}
-        <mesh position={[0, 0.031, 0]}>
-          <boxGeometry args={[0.48, 0.002, 0.48]} />
-          <meshStandardMaterial
-            color="#1a1a28"
-            metalness={0.8}
-            roughness={0.3}
-            transparent
-            opacity={opacity}
-          />
-        </mesh>
+      {/* Holographic projection cone */}
+      <mesh position={[0, -0.2, 0]}>
+        <coneGeometry args={[0.35, 0.4, 32, 1, true]} />
+        <meshBasicMaterial
+          color={COLORS.gold}
+          transparent
+          opacity={opacity * (isActive ? 0.05 : 0.01)}
+          side={THREE.DoubleSide}
+        />
+      </mesh>
 
-        {/* Circuit traces */}
-        {circuitPaths.map((path, i) => (
-          <mesh
-            key={i}
-            position={[
-              path.horizontal ? 0 : path.start[0],
-              0.035,
-              path.horizontal ? path.start[1] : 0,
-            ]}
-          >
-            <boxGeometry
-              args={
-                path.horizontal ? [0.44, 0.002, 0.008] : [0.008, 0.002, 0.44]
-              }
-            />
-            <meshBasicMaterial
-              color={COLORS.navyLight}
-              transparent
-              opacity={opacity * (isActive ? 0.6 : 0.25)}
-            />
-          </mesh>
-        ))}
-
-        {/* Central processing core */}
-        <group position={[0, 0.06, 0]}>
-          {/* Core base */}
+      {/* Main holographic display */}
+      <group ref={mainRef} position={[0, 0.08, 0]}>
+        {/* Central AI Core - Multi-layer icosahedron */}
+        <group ref={coreRef}>
+          {/* Outer glass shell */}
           <mesh>
-            <boxGeometry args={[0.18, 0.04, 0.18]} />
-            <meshStandardMaterial
-              color="#15152a"
-              metalness={0.9}
-              roughness={0.15}
+            <icosahedronGeometry args={[0.1, 1]} />
+            <meshPhysicalMaterial
+              color="#ffffff"
+              metalness={0.1}
+              roughness={0}
+              transmission={0.95}
+              thickness={0.3}
               transparent
-              opacity={opacity}
+              opacity={opacity * 0.4}
             />
           </mesh>
 
-          {/* Core glow */}
-          <mesh ref={coreRef} position={[0, 0.025, 0]}>
-            <boxGeometry args={[0.12, 0.02, 0.12]} />
+          {/* Middle energy layer */}
+          <mesh>
+            <icosahedronGeometry args={[0.07, 0]} />
             <meshBasicMaterial
               color={COLORS.gold}
               transparent
-              opacity={opacity * (isActive ? 0.9 : 0.4)}
+              opacity={opacity * (isActive ? 0.7 : 0.35)}
+              wireframe
             />
           </mesh>
 
-          {/* AI symbol in core */}
-          <mesh position={[0, 0.04, 0]}>
-            <octahedronGeometry args={[0.04, 0]} />
-            <meshStandardMaterial
+          {/* Inner core */}
+          <mesh>
+            <icosahedronGeometry args={[0.045, 0]} />
+            <meshBasicMaterial
               color={COLORS.gold}
-              metalness={1}
-              roughness={0.1}
-              emissive={COLORS.gold}
-              emissiveIntensity={isActive ? 0.6 : 0.2}
               transparent
-              opacity={opacity}
+              opacity={opacity * (isActive ? 0.95 : 0.5)}
             />
+          </mesh>
+
+          {/* Core light */}
+          <mesh>
+            <sphereGeometry args={[0.025, 16, 16]} />
+            <meshBasicMaterial color="#ffffff" transparent opacity={opacity} />
           </mesh>
         </group>
 
-        {/* Corner connectors (chip pins visual) */}
-        {[
-          [-0.22, -0.22],
-          [0.22, -0.22],
-          [-0.22, 0.22],
-          [0.22, 0.22],
-        ].map(([x, z], i) => (
-          <mesh key={i} position={[x, 0, z]}>
-            <boxGeometry args={[0.06, 0.08, 0.06]} />
-            <meshStandardMaterial
-              color="#1a1a2e"
-              metalness={0.9}
-              roughness={0.2}
+        {/* 3D Neural Network Sphere */}
+        <group ref={neuralNetRef}>
+          {/* Neural nodes */}
+          {neuralNetwork.map((node, i) => (
+            <group key={i} position={node.pos}>
+              <mesh>
+                <sphereGeometry args={[node.size, 12, 12]} />
+                <meshBasicMaterial
+                  color={
+                    node.layer === 0
+                      ? "#ffffff"
+                      : node.layer === 1
+                        ? COLORS.gold
+                        : node.layer === 2
+                          ? COLORS.navyLight
+                          : "#4a6fa5"
+                  }
+                  transparent
+                  opacity={opacity * (isActive ? 0.9 : 0.4)}
+                />
+              </mesh>
+              {/* Node glow */}
+              {node.layer < 2 && (
+                <mesh>
+                  <sphereGeometry args={[node.size * 1.8, 8, 8]} />
+                  <meshBasicMaterial
+                    color={COLORS.gold}
+                    transparent
+                    opacity={opacity * (isActive ? 0.15 : 0.05)}
+                  />
+                </mesh>
+              )}
+            </group>
+          ))}
+
+          {/* Neural connections */}
+          {connections
+            .slice(0, isActive ? connections.length : 20)
+            .map((conn, i) => (
+              <line key={i}>
+                <bufferGeometry>
+                  <bufferAttribute
+                    attach="attributes-position"
+                    count={2}
+                    array={
+                      new Float32Array([
+                        conn.start.x,
+                        conn.start.y,
+                        conn.start.z,
+                        conn.end.x,
+                        conn.end.y,
+                        conn.end.z,
+                      ])
+                    }
+                    itemSize={3}
+                  />
+                </bufferGeometry>
+                <lineBasicMaterial
+                  color={COLORS.gold}
+                  transparent
+                  opacity={opacity * conn.strength * (isActive ? 0.5 : 0.15)}
+                />
+              </line>
+            ))}
+        </group>
+
+        {/* Pulse rings */}
+        <group ref={pulseRingsRef}>
+          {[0, 1, 2, 3, 4].map((i) => (
+            <mesh key={i} rotation={[Math.PI / 2, 0, 0]}>
+              <torusGeometry args={[0.12 + i * 0.045, 0.003, 8, 64]} />
+              <meshBasicMaterial
+                color={i % 2 === 0 ? COLORS.gold : COLORS.navyLight}
+                transparent
+                opacity={opacity * 0.3}
+              />
+            </mesh>
+          ))}
+        </group>
+
+        {/* Orbital rings with particles */}
+        <group ref={orbitalRef}>
+          {[
+            { radius: 0.32, tilt: [Math.PI / 4, 0, 0], color: COLORS.gold },
+            {
+              radius: 0.35,
+              tilt: [Math.PI / 3, Math.PI / 3, 0],
+              color: COLORS.navyLight,
+            },
+            {
+              radius: 0.38,
+              tilt: [Math.PI / 5, Math.PI / 6, Math.PI / 4],
+              color: "#ffffff",
+            },
+          ].map((ring, i) => (
+            <group key={i} rotation={ring.tilt as [number, number, number]}>
+              <mesh>
+                <torusGeometry args={[ring.radius, 0.002, 8, 64]} />
+                <meshBasicMaterial
+                  color={ring.color}
+                  transparent
+                  opacity={opacity * (isActive ? 0.6 - i * 0.15 : 0.15)}
+                />
+              </mesh>
+              {/* Orbiting particles */}
+              {[0, 1, 2].map((p) => (
+                <mesh
+                  key={p}
+                  position={[
+                    Math.cos((p / 3) * Math.PI * 2) * ring.radius,
+                    0,
+                    Math.sin((p / 3) * Math.PI * 2) * ring.radius,
+                  ]}
+                >
+                  <sphereGeometry args={[0.012, 8, 8]} />
+                  <meshBasicMaterial
+                    color={ring.color}
+                    transparent
+                    opacity={opacity * (isActive ? 1 : 0.4)}
+                  />
+                </mesh>
+              ))}
+            </group>
+          ))}
+        </group>
+
+        {/* DNA-style data stream */}
+        {isActive && (
+          <points ref={dataStreamRef}>
+            <bufferGeometry>
+              <bufferAttribute
+                attach="attributes-position"
+                count={150}
+                array={dataStream.positions}
+                itemSize={3}
+              />
+              <bufferAttribute
+                attach="attributes-color"
+                count={150}
+                array={dataStream.colors}
+                itemSize={3}
+              />
+            </bufferGeometry>
+            <pointsMaterial
+              size={0.01}
+              vertexColors
               transparent
-              opacity={opacity}
+              opacity={0.9}
+              sizeAttenuation
             />
-          </mesh>
-        ))}
-
-        {/* Edge pins */}
-        {[-1, 1].map((side) =>
-          [-0.15, -0.05, 0.05, 0.15].map((offset, i) => (
-            <mesh key={`h${side}${i}`} position={[side * 0.27, -0.01, offset]}>
-              <boxGeometry args={[0.04, 0.02, 0.025]} />
-              <meshStandardMaterial
-                color={COLORS.gold}
-                metalness={1}
-                roughness={0.15}
-                transparent
-                opacity={opacity * 0.8}
-              />
-            </mesh>
-          )),
-        )}
-        {[-1, 1].map((side) =>
-          [-0.15, -0.05, 0.05, 0.15].map((offset, i) => (
-            <mesh key={`v${side}${i}`} position={[offset, -0.01, side * 0.27]}>
-              <boxGeometry args={[0.025, 0.02, 0.04]} />
-              <meshStandardMaterial
-                color={COLORS.gold}
-                metalness={1}
-                roughness={0.15}
-                transparent
-                opacity={opacity * 0.8}
-              />
-            </mesh>
-          )),
+          </points>
         )}
       </group>
 
-      {/* Holographic data rings */}
-      <group ref={ringsRef} position={[0, 0.15, 0]}>
-        <mesh rotation={[Math.PI / 2, 0, 0]}>
-          <torusGeometry args={[0.35, 0.004, 8, 64]} />
-          <meshBasicMaterial
-            color={COLORS.gold}
-            transparent
-            opacity={opacity * (isActive ? 0.6 : 0.2)}
-          />
-        </mesh>
-        <mesh rotation={[Math.PI / 2.5, 0.3, 0]}>
-          <torusGeometry args={[0.38, 0.003, 8, 64]} />
-          <meshBasicMaterial
-            color={COLORS.navyLight}
-            transparent
-            opacity={opacity * (isActive ? 0.4 : 0.1)}
-          />
-        </mesh>
-      </group>
+      {/* Hexagonal base accents */}
+      {[0, 1, 2, 3, 4, 5].map((i) => {
+        const angle = (i / 6) * Math.PI * 2 + Math.PI / 6;
+        return (
+          <group key={i}>
+            <mesh
+              position={[Math.cos(angle) * 0.4, -0.4, Math.sin(angle) * 0.4]}
+            >
+              <boxGeometry args={[0.025, 0.025, 0.025]} />
+              <meshStandardMaterial
+                color={COLORS.gold}
+                metalness={1}
+                roughness={0.1}
+                emissive={COLORS.gold}
+                emissiveIntensity={isActive ? 0.5 : 0.15}
+                transparent
+                opacity={opacity}
+              />
+            </mesh>
+            {/* Connecting lines to center */}
+            {isActive && (
+              <line>
+                <bufferGeometry>
+                  <bufferAttribute
+                    attach="attributes-position"
+                    count={2}
+                    array={
+                      new Float32Array([
+                        Math.cos(angle) * 0.4,
+                        -0.39,
+                        Math.sin(angle) * 0.4,
+                        Math.cos(angle) * 0.1,
+                        -0.39,
+                        Math.sin(angle) * 0.1,
+                      ])
+                    }
+                    itemSize={3}
+                  />
+                </bufferGeometry>
+                <lineBasicMaterial
+                  color={COLORS.gold}
+                  transparent
+                  opacity={opacity * 0.3}
+                />
+              </line>
+            )}
+          </group>
+        );
+      })}
 
-      {/* Data flow particles */}
-      {isActive && (
-        <points ref={dataFlowRef} position={[0, 0.1, 0]}>
-          <bufferGeometry>
-            <bufferAttribute
-              attach="attributes-position"
-              count={50}
-              array={dataParticles}
-              itemSize={3}
-            />
-          </bufferGeometry>
-          <pointsMaterial
-            size={0.015}
-            color={COLORS.gold}
-            transparent
-            opacity={0.8}
-            sizeAttenuation
-          />
-        </points>
-      )}
-
-      {/* Vertical energy beam */}
-      {isActive && (
-        <mesh position={[0, -0.1, 0]}>
-          <cylinderGeometry args={[0.02, 0.08, 0.5, 16, 1, true]} />
-          <meshBasicMaterial
-            color={COLORS.gold}
-            transparent
-            opacity={0.15}
-            side={THREE.DoubleSide}
-          />
-        </mesh>
-      )}
-
-      {/* Ambient lighting */}
+      {/* Premium ambient lighting */}
       {isActive && (
         <>
           <pointLight
             color={COLORS.gold}
-            intensity={2}
-            distance={2.5}
-            position={[0, 0.2, 0]}
+            intensity={3}
+            distance={2}
+            position={[0, 0.15, 0]}
           />
           <pointLight
-            color={COLORS.navyBlue}
-            intensity={0.8}
+            color={COLORS.navyLight}
+            intensity={1.5}
             distance={1.5}
-            position={[0, -0.2, 0]}
+            position={[0, -0.1, 0]}
+          />
+          <pointLight
+            color="#ffffff"
+            intensity={0.8}
+            distance={1}
+            position={[0, 0.3, 0]}
           />
         </>
       )}
