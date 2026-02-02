@@ -484,8 +484,7 @@ function NeuralBrain({
                 <bufferGeometry>
                   <bufferAttribute
                     attach="attributes-position"
-                    count={2}
-                    array={
+                    args={[
                       new Float32Array([
                         conn.start.x,
                         conn.start.y,
@@ -493,9 +492,9 @@ function NeuralBrain({
                         conn.end.x,
                         conn.end.y,
                         conn.end.z,
-                      ])
-                    }
-                    itemSize={3}
+                      ]),
+                      3,
+                    ]}
                   />
                 </bufferGeometry>
                 <lineBasicMaterial
@@ -573,15 +572,11 @@ function NeuralBrain({
             <bufferGeometry>
               <bufferAttribute
                 attach="attributes-position"
-                count={150}
-                array={dataStream.positions}
-                itemSize={3}
+                args={[dataStream.positions, 3]}
               />
               <bufferAttribute
                 attach="attributes-color"
-                count={150}
-                array={dataStream.colors}
-                itemSize={3}
+                args={[dataStream.colors, 3]}
               />
             </bufferGeometry>
             <pointsMaterial
@@ -620,8 +615,7 @@ function NeuralBrain({
                 <bufferGeometry>
                   <bufferAttribute
                     attach="attributes-position"
-                    count={2}
-                    array={
+                    args={[
                       new Float32Array([
                         Math.cos(angle) * 0.4,
                         -0.39,
@@ -629,9 +623,9 @@ function NeuralBrain({
                         Math.cos(angle) * 0.1,
                         -0.39,
                         Math.sin(angle) * 0.1,
-                      ])
-                    }
-                    itemSize={3}
+                      ]),
+                      3,
+                    ]}
                   />
                 </bufferGeometry>
                 <lineBasicMaterial
@@ -830,15 +824,11 @@ function LeadFunnel({
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={100}
-            array={particles.positions}
-            itemSize={3}
+            args={[particles.positions, 3]}
           />
           <bufferAttribute
             attach="attributes-color"
-            count={100}
-            array={particles.colors}
-            itemSize={3}
+            args={[particles.colors, 3]}
           />
         </bufferGeometry>
         <pointsMaterial
@@ -855,9 +845,7 @@ function LeadFunnel({
         <bufferGeometry>
           <bufferAttribute
             attach="attributes-position"
-            count={20}
-            array={qualifiedParticles}
-            itemSize={3}
+            args={[qualifiedParticles, 3]}
           />
         </bufferGeometry>
         <pointsMaterial
@@ -1148,9 +1136,7 @@ function AdBillboard({
           <bufferGeometry>
             <bufferAttribute
               attach="attributes-position"
-              count={40}
-              array={particles}
-              itemSize={3}
+              args={[particles, 3]}
             />
           </bufferGeometry>
           <pointsMaterial
@@ -1330,11 +1316,8 @@ function GearSystem({
       >
         <GearShape radius={0.3} teeth={16} thickness={0.06} />
         {/* Center hub */}
-        <mesh position={[0, 0, 0.03]}>
-          <cylinderGeometry
-            args={[0.08, 0.08, 0.08, 16]}
-            rotation={[Math.PI / 2, 0, 0]}
-          />
+        <mesh position={[0, 0, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.08, 0.08, 0.08, 16]} />
           <meshStandardMaterial
             color="#1a1a2e"
             metalness={0.8}
@@ -1352,11 +1335,8 @@ function GearSystem({
         rotation={[Math.PI / 2, 0, 0]}
       >
         <GearShape radius={0.2} teeth={12} thickness={0.06} />
-        <mesh position={[0, 0, 0.03]}>
-          <cylinderGeometry
-            args={[0.05, 0.05, 0.08, 16]}
-            rotation={[Math.PI / 2, 0, 0]}
-          />
+        <mesh position={[0, 0, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.05, 0.05, 0.08, 16]} />
           <meshStandardMaterial
             color="#1a1a2e"
             metalness={0.8}
@@ -1374,11 +1354,8 @@ function GearSystem({
         rotation={[Math.PI / 2, 0, 0]}
       >
         <GearShape radius={0.18} teeth={10} thickness={0.06} />
-        <mesh position={[0, 0, 0.03]}>
-          <cylinderGeometry
-            args={[0.04, 0.04, 0.08, 16]}
-            rotation={[Math.PI / 2, 0, 0]}
-          />
+        <mesh position={[0, 0, 0.03]} rotation={[Math.PI / 2, 0, 0]}>
+          <cylinderGeometry args={[0.04, 0.04, 0.08, 16]} />
           <meshStandardMaterial
             color="#1a1a2e"
             metalness={0.8}
@@ -1399,11 +1376,8 @@ function GearSystem({
       </group>
 
       {/* Connecting rods */}
-      <mesh position={[-0.2, 0, -0.08]}>
-        <cylinderGeometry
-          args={[0.02, 0.02, 0.15, 8]}
-          rotation={[Math.PI / 2, 0, 0]}
-        />
+      <mesh position={[-0.2, 0, -0.08]} rotation={[Math.PI / 2, 0, 0]}>
+        <cylinderGeometry args={[0.02, 0.02, 0.15, 8]} />
         <meshStandardMaterial
           color="#15151f"
           metalness={0.9}
@@ -1518,11 +1492,8 @@ function BalanceScale({
 
       {/* Decorative rings on pillar */}
       {[-0.3, -0.1, 0.1].map((y, i) => (
-        <mesh key={i} position={[0, y, 0]}>
-          <torusGeometry
-            args={[0.06, 0.01, 8, 16]}
-            rotation={[Math.PI / 2, 0, 0]}
-          />
+        <mesh key={i} position={[0, y, 0]} rotation={[Math.PI / 2, 0, 0]}>
+          <torusGeometry args={[0.06, 0.01, 8, 16]} />
           <meshStandardMaterial
             color="#2a2a3e"
             metalness={0.9}
