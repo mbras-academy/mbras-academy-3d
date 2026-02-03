@@ -1,137 +1,219 @@
-# MBRAS Academy - The Stack
+# MBRAS Academy 3D
 
-> Precision is the curriculum.
+Interactive 3D visualization platform for MBRAS Academy - a training program for luxury real estate professionals.
+
+## Live Demo
+
+- **Production:** https://academy3d.mbras.com.br
+- **Vercel:** https://mbras-academy-3d.vercel.app
 
 ## Overview
 
-Este é o componente **The Stack** da MBRAS Academy — uma visualização 3D interativa de 5 camadas que representam a stack cognitiva do programa:
+MBRAS Academy 3D is an immersive web experience showcasing the academy's curriculum through interactive 3D objects. Each module is represented by a semantic 3D visualization that users can explore through rotation, zoom, and navigation.
 
-```
-Signal → Structure → Intelligence → Control → Scale
-```
+### Modules
 
-## Stack Tecnológica
+| Module | Title | 3D Object | Description |
+|--------|-------|-----------|-------------|
+| Módulo 1 | Fundamentos de IA | Neural Hologram | Spherical neural network with animated connections |
+| Módulo 2 | Qualificação de Leads | Lead Funnel | Glass funnel with particle flow simulation |
+| Módulo 3 | Automações e CRM | Gear System | Interlocking gears with energy indicators |
+| Módulo 4 | Precificação Inteligente | Balance Scale | Precision scale with animated oscillation |
 
-- **Framework:** Next.js 14 (App Router)
-- **3D Engine:** React Three Fiber + Three.js
-- **Animação:** Nativo (useFrame) + CSS transitions
-- **TypeScript:** Strict mode
+## Tech Stack
 
-## Estrutura de Arquivos
+- **Framework:** Next.js 16.1.6 (Turbopack)
+- **3D Engine:** React Three Fiber (@react-three/fiber)
+- **3D Helpers:** @react-three/drei (OrbitControls, Stars, Environment, Text)
+- **Post-processing:** @react-three/postprocessing (Bloom, ChromaticAberration)
+- **Styling:** CSS-in-JS with inline styles
+- **Fonts:** Playfair Display (Google Fonts)
+- **Deployment:** Vercel
+
+## Features
+
+### Desktop Experience
+- Full-screen 3D canvas with orbit controls
+- Left sidebar navigation with module pills
+- Right info panel with module details and topics
+- Post-processing effects (Bloom, Chromatic Aberration)
+- Smooth hover/click interactions
+- Stars background with environment lighting
+
+### Mobile Experience
+- Touch swipe navigation between modules
+- Bottom info panel with module details
+- Slide-down menu for module selection
+- Swipe progress indicator dots
+- Optimized rendering (lower DPR, fewer particles)
+- Touch-friendly button sizes (44px minimum)
+- iOS overscroll prevention
+
+## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── layout.tsx          # Root layout
-│   └── page.tsx            # Demo page
+│   ├── layout.tsx          # Root layout with metadata
+│   ├── page.tsx            # Home page mounting TheStack
+│   └── globals.css         # Global styles
 │
 └── components/
     └── TheStack/
-        ├── index.tsx       # Container principal + Canvas
-        ├── Stack.tsx       # Grupo 3D das camadas
-        ├── Layer.tsx       # Camada individual
-        ├── LayerVisual.tsx # Seletor de visual por tipo
-        ├── InfoPanel.tsx   # Painel de informação (HTML)
-        ├── types.ts        # Tipos e constantes
-        │
-        ├── hooks/
-        │   ├── index.ts
-        │   ├── useReducedMotion.ts
-        │   ├── useLayerHover.ts
-        │   └── useScrollProgress.ts
-        │
-        ├── visuals/
-        │   ├── index.ts
-        │   ├── SignalParticles.tsx    # Partículas caóticas
-        │   ├── StructureGrid.tsx      # Grid wireframe
-        │   ├── IntelligenceField.tsx  # Vector field
-        │   ├── ControlLoop.tsx        # Feedback loops
-        │   └── ScaleReplication.tsx   # Cubos replicantes
-        │
-        └── fallback/
-            └── StackCSS.tsx  # Fallback sem WebGL
+        ├── index.tsx       # Main component (Canvas, UI, mobile/desktop)
+        ├── Stack.tsx       # 3D stack container with layer positioning
+        ├── Layer.tsx       # Individual layer with 3D objects
+        ├── InfoPanel.tsx   # Module details panel (desktop)
+        ├── LayerVisual.tsx # Visual selector (deprecated)
+        ├── hooks.ts        # Custom hooks (useLayerHover, useScrollProgress)
+        ├── types.ts        # TypeScript types, COLORS, LAYERS data
+        └── visuals/        # Additional visual components
 ```
 
-## Instalação
+## Color Palette
 
+```typescript
+const COLORS = {
+  absoluteBlack: "#000000",
+  onyx: "#0a0a0f",
+  richBlack: "#050508",
+  navyBlue: "#1a3a5c",
+  navyLight: "#2a4a6c",
+  navyDark: "#0f2a4c",
+  gold: "#d4af37",
+  goldLight: "#e8c547",
+  goldDark: "#b89830",
+  titaniumWhite: "#f4f4f4",
+  platinum: "#e8e8e8",
+  silver: "#a8a8a8",
+};
+```
+
+## 3D Objects Detail
+
+### 1. Neural Hologram (AI Foundations)
+- Multi-layer icosahedron core (glass + wireframe + solid)
+- 46 neural nodes distributed via Fibonacci sphere algorithm
+- Dynamic connections between nearby nodes
+- DNA-style double helix particle stream
+- Pulsing rings with animated opacity
+- Triple orbital rings with orbiting particles
+- Hexagonal luxury base with gold accents
+
+### 2. Lead Funnel (Lead Qualification)
+- Glass funnel with transmission material
+- Particle system simulating leads falling
+- Filter rings inside funnel
+- Qualified leads dropping from spout
+- Score indicators (A, B, C grades)
+- Collection container with glow effect
+
+### 3. Gear System (Automations & CRM)
+- Multiple interlocking gears with rotation
+- Procedural gear shape generation
+- Connecting rods between gears
+- Energy flow indicators when active
+- Automation flow arrows
+
+### 4. Balance Scale (Intelligent Pricing)
+- Animated beam oscillation
+- Dual pans with value indicators
+- Chain link connections
+- Center gauge with needle
+- Price tag display when active
+
+## Development
+
+### Prerequisites
+- Node.js 18+
+- npm or yarn
+
+### Installation
 ```bash
-# Clone o repositório
-git clone <repo-url>
-cd mbras-academy
-
-# Instale as dependências
+git clone https://github.com/mbras-academy/mbras-academy-3d.git
+cd mbras-academy-3d
 npm install
+```
 
-# Rode em desenvolvimento
+### Running Locally
+```bash
 npm run dev
 ```
+Open http://localhost:3000
 
-## Uso do Componente
+### Building
+```bash
+npm run build
+```
 
-```tsx
-import { TheStack } from '@/components/TheStack'
+### Deployment
+```bash
+npx vercel --prod
+```
 
-export default function Page() {
-  const handleLayerSelect = (layerId: LayerId) => {
-    console.log('Selected:', layerId)
-    // Navigate to deep dive
-  }
+## Configuration
 
-  return (
-    <TheStack
-      onLayerSelect={handleLayerSelect}
-      enableScroll={true}
-      sectionHeight="250vh"
-    />
-  )
+### Stack Configuration (types.ts)
+```typescript
+export const STACK_CONFIG = {
+  gapDefault: 1.8,
+  gapExpanded: 2.2,
+  gapCompressed: 1.4,
+  rotationSpeed: 0.1,
+  hoverScale: 1.1,
+  activeScale: 1.15,
+};
+```
+
+### Layer Data Structure
+```typescript
+interface LayerData {
+  id: LayerId;
+  index: number;
+  module: string;      // e.g., "Módulo 1"
+  title: string;       // e.g., "Fundamentos de IA"
+  subtitle: string;    // Brief description
+  description: string; // Full description
+  topics: string[];    // List of topics covered
 }
 ```
 
-## Props
+## Performance Optimizations
 
-| Prop | Tipo | Default | Descrição |
-|------|------|---------|-----------|
-| `onLayerSelect` | `(id: LayerId) => void` | - | Callback quando uma camada é clicada |
-| `enableScroll` | `boolean` | `true` | Habilita animação baseada em scroll |
-| `sectionHeight` | `string` | `'200vh'` | Altura da seção para cálculo de scroll |
-| `className` | `string` | `''` | Classes CSS adicionais |
+### Mobile
+- DPR capped at 1.5 (vs 2 on desktop)
+- 500 stars (vs 1000 on desktop)
+- Chromatic aberration disabled
+- Low-power GPU preference
+- Zoom disabled
+- Simplified post-processing
 
-## Camadas
+### General
+- AdaptiveDpr for dynamic resolution
+- AdaptiveEvents for event optimization
+- Suspense boundaries for lazy loading
+- Preload all assets
+- Memoized geometry calculations
 
-Cada camada possui um visual único:
+## Browser Support
 
-| Camada | Visual | Conceito |
-|--------|--------|----------|
-| **Signal** | Partículas caóticas | Dados brutos, entropia |
-| **Structure** | Grid wireframe | Padrões, conexões |
-| **Intelligence** | Vector field | Gradientes, fluxo |
-| **Control** | Feedback loops | Regulação, estabilidade |
-| **Scale** | Cubos replicantes | Paralelismo, crescimento |
+- Chrome 90+
+- Firefox 90+
+- Safari 14+
+- Edge 90+
+- Mobile Safari (iOS 14+)
+- Chrome Mobile (Android 10+)
 
-## Performance
+## Credits
 
-Targets definidos na spec:
+- **Design & Development:** MBRAS × IBVI
+- **3D Visualization:** Custom React Three Fiber components
+- **Typography:** Playfair Display by Claus Eggers Sørensen
 
-- FPS Desktop: 60 (crítico: >45)
-- FPS Mobile: 30 (crítico: >24)
-- First Paint: <1.5s
-- GPU Memory: <150MB
+## License
 
-## Acessibilidade
-
-- Suporte a `prefers-reduced-motion`
-- Fallback CSS para browsers sem WebGL
-- Navegação por teclado (em desenvolvimento)
-
-## Próximos Passos
-
-1. [ ] Integração com GSAP ScrollTrigger
-2. [ ] Transição para Deep Dive
-3. [ ] Theatre.js para orquestração
-4. [ ] Shaders customizados
-5. [ ] Testes de performance
+Private - MBRAS Academy 2025
 
 ---
 
-**MBRAS Academy**  
-*Built for those who already know the basics.*
+**Repository:** https://github.com/mbras-academy/mbras-academy-3d
